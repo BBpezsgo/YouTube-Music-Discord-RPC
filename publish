@@ -1,0 +1,13 @@
+#!/bin/sh
+
+cd extension
+./build
+cd ..
+
+cd host
+./build
+cd ..
+
+cp ./extension/out/discord-youtube-music.zip ./out/
+cp ./host/bin/Release/net10.0/linux-x64/publish/host ./out/host-linux-x64
+cp ./host/bin/Release/net10.0/win-x64/publish/host.exe ./out/host-win-x64.exe

@@ -5,5 +5,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="../Logger/Logger.csproj" />
-  <Project Path="Server.NET/Server.NET.csproj" />
+  <Project Path="host/Host.csproj" />
 </Solution>

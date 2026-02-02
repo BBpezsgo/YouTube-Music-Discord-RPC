@@ -6,7 +6,7 @@ using Logger;
 
 namespace DiscordRPCHost;
 
-partial class WebSocketServer : IDisposable
+sealed partial class WebSocketServer : IDisposable
 {
     readonly TcpListener Server;
 

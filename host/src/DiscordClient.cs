@@ -4,7 +4,7 @@ using Logger;
 
 namespace DiscordRPCHost;
 
-public class DiscordClient : IDisposable
+public sealed class DiscordClient : IDisposable
 {
     public DiscordRpcClient DiscordRpcClient { get; }
     bool IsReady;

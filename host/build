@@ -1,0 +1,4 @@
+#!/bin/sh
+
+dotnet publish --runtime linux-x64
+dotnet publish --runtime win-x64

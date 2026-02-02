@@ -3,7 +3,7 @@ using Logger;
 
 namespace DiscordRPCHost;
 
-public class DiscordManager : IDisposable
+public sealed class DiscordManager : IDisposable
 {
     readonly Dictionary<string, DiscordClient> Clients = [];
 

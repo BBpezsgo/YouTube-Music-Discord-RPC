@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# !!! This script is only for me !!!
+
+cd host
+dotnet publish --runtime linux-x64
+mv ./bin/Release/net10.0/linux-x64/publish/host ~/scripts/discordrpc
+cd ..
