@@ -1,0 +1,3 @@
+#!/bin/sh
+dotnet publish --output ~/scripts --runtime linux-x64 -p:DebugSymbols=false
+mv ~/scripts/Server.NET ~/scripts/discordrpc

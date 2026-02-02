@@ -1,0 +1,32 @@
+root = true
+charset = utf-8
+
+trim_trailing_whitespace = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+
+[*.less]
+indent_style = space
+indent_size = 2
+
+[*.js]
+indent_style = space
+indent_size = 2
+
+[*.ts]
+indent_style = space
+indent_size = 2
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# IDE0040: Add accessibility modifiers
+dotnet_style_require_accessibility_modifiers = omit_if_default
+
+# IDE0011: Add braces
+csharp_prefer_braces = when_multiline

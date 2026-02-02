@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="./vendor/materialFont.css">
+  <style type="text/css">
+    html,
+    body {
+      max-width: 400px;
+      margin: 0;
+      padding: 0;
+      color: #EFEFF0;
+      background-color: #1E1F22;
+      font-size: 14px;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+
+    #main {
+      margin: 10px;
+    }
+
+    button,
+    .button {
+      background-color: transparent;
+      border: none;
+      color: #EFEFF0;
+      cursor: pointer;
+    }
+
+    .page-config {
+      margin-top: 5px;
+    }
+
+    .disable-page {
+      position: relative;
+      padding: 0;
+      height: 24px;
+      width: 24px;
+    }
+
+    .disable-page img {
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      border-radius: 3px;
+      pointer-events: none;
+    }
+
+    .disable-page i {
+      position: absolute;
+      display: none;
+      left: 0px;
+      top: 0px;
+      pointer-events: none;
+    }
+
+    .disable-page.enabled .i-enabled {
+      display: block;
+      color: #01ff01;
+    }
+
+    .disable-page.disabled .i-disabled {
+      display: block;
+      color: #ffa4a4;
+    }
+
+    .page-remover {
+      position: relative;
+      top: -2px;
+      float: right;
+    }
+
+    .thumbnail {
+      flex: auto 0 0;
+      border: none;
+    }
+
+    .thumbnail>img {
+      border-radius: 10px;
+    }
+
+    .content {
+      flex: auto 1 1;
+      padding: 8px;
+    }
+
+    .content h1 {
+      font-size: 1rem;
+      margin: 2px;
+    }
+
+    .content p {
+      color: #CFD6DF;
+      margin: 2px;
+    }
+
+    .horizontal {
+      display: flex;
+      text-wrap: nowrap;
+      align-items: center;
+    }
+
+    .time {
+      color: #3B9D54;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+    }
+
+    .time-progress {
+      display: flex;
+    }
+
+    .time-progress span {
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .time-progress-bar {
+      flex: 1;
+      background-color: #444;
+      height: 2px;
+      border-radius: 2px;
+      align-self: center;
+      margin: 0px 4px;
+    }
+
+    .time-progress-bar>div {
+      background-color: #ccc;
+      height: 100%;
+      border-radius: 2px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div id="main"></div>
+  <script type="text/javascript" src="popup.js"></script>
+</body>
+
+</html>
