@@ -172,17 +172,22 @@ function makePresence(data) {
   const result = {
     type: 2,
     details: data.title.substring(0, 128),
-    detailsUrl: data.videoId ? `https://music.youtube.com/watch?v=${data.videoId}` : null,
+    detailsUrl: data.videoId ? `https://www.youtube.com/watch?v=${data.videoId}` : null,
     stateUrl: data.channelUrl,
     state: data.author.substring(0, 128),
-    statusDisplay: 2,
+    statusDisplay: 1,
   }
 
   result.assets = {
     largeImageKey: data.thumbnailUrl,
   }
 
-  if (data.playerState == 2) {
+  if (data.albumLinks?.length === 1 && data.albumLinks[0].text !== data.title) {
+    result.assets.largeImageUrl = data.albumLinks[0].link
+    result.assets.largeImageText = data.albumLinks[0].text
+  }
+
+  if (data.playerState == 2 || data.playerState == -1) {
     return null
   } else if (data.timeLeft != -1) {
     result.timestamps = {
@@ -198,6 +203,13 @@ function makePresence(data) {
   return result
 }
 
+/** @type {Map<number, any>} */
+const tabPresences = new Map()
+
+browser.tabs.onRemoved.addListener(tabId => {
+  tabPresences.delete(tabId)
+})
+
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message.messageType) {
     console.warn('Invalid message', message, sender)
@@ -206,9 +218,21 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   switch (message.messageType) {
     case 'UPDATE_PRESENCE_DATA':
-      console.log(message.detail)
+      console.log(`Received player info`, message.detail)
       presence = makePresence(message.detail)
       setPresenceIcon()
+
+      if (sender.tab?.id !== undefined && sender.tab?.id !== null) {
+        tabPresences.set(sender.tab.id, presence)
+        for (const tabId of tabPresences.keys()) {
+          if (tabId !== sender.tab.id && tabPresences.get(tabId) && !presence){
+            console.log(`Ignoring empty presence because an other presence is active on an other tab`)
+            return
+          }
+        }
+      } else {
+        console.warn('No tab id', message, sender)
+      }
 
       ws.connect()
         .then(() => {

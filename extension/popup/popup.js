@@ -9,6 +9,7 @@ function refresh(data) {
   if (!data.websocket) {
     html += '<div><b>Not connected</b></div>'
   } else if (data.presences) {
+    html = '<div><b>No presences</b></div>'
     /**
      * @param {number} seconds
      * @returns {string}

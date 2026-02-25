@@ -46,5 +46,10 @@
         "src/content-loader.js"
       ]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{8dc934c4-06f8-4134-8569-f8ef5d0970ba}"
+    }
+  }
 }

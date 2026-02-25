@@ -1,3 +1,4 @@
 #!/bin/sh
 
-zip -r -FS ./out/discord-youtube-music.zip ./icons ./popup ./src ./manifest.json
+mkdir out
+zip -r -FS ./out/discord-youtube-music.xpi ./icons ./popup ./src ./manifest.json

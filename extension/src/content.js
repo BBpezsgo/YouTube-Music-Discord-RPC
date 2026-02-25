@@ -126,6 +126,10 @@ function handleYouTubeData() {
       documentData.title = data.title
       documentData.author = data.author_name
       documentData.channelUrl = data.author_url
+      try {
+        documentData.albumLinks = [...document.getElementsByTagName('ytmusic-player-bar').item(0).getElementsByTagName('a')].map(v => ({ link: v.href, text: v.textContent })).filter(v => v.link).filter(v => v.link.includes('browse/'))
+      } catch (error) {
+      }
       getTimeData()
       sendDocumentData()
     }).catch(error => {
