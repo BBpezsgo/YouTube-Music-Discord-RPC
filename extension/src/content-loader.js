@@ -8,7 +8,7 @@ window.addEventListener("SendToLoader", (/** @type {CustomEvent} */ message) => 
 }, false)
 
 const mainScript = document.createElement("script")
-mainScript.src = browser.runtime.getURL("/src/content.js");
+mainScript.src = browser.runtime.getURL("/src/content.min.js");
 (document.head || document.documentElement).appendChild(mainScript)
 mainScript.onload = function () {
   this.remove()

@@ -13,9 +13,6 @@ const MINIPLAYER_LIVESTREAM_AUTHOR_SELECTOR = "#video-container #info-bar #owner
 const NO_MINIPLAYER_ATTRIBUTE = "display: none;"
 const YES_MINIPLAYER_ATRRIBUTE = ""
 
-/** @type {import('./types').VideoInfo} */
-let documentData = null
-
 /**
  * @param {string} url
  * @returns {string | null}
@@ -159,7 +156,9 @@ setInterval(() => {
   /** @type {import('./types').YouTubeVideoPlayer} */ // @ts-ignore
   const videoPlayer = document.getElementById("movie_player")
   if (videoPlayer && document.querySelector(AD_SELECTOR) == null) {
-    handleYouTubeData(videoPlayer, documentData)
-    sendDocumentData(documentData)
+    /** @type {import('./types').VideoInfo} */ //@ts-ignore
+    let videoInfo = {}
+    handleYouTubeData(videoPlayer, videoInfo)
+    sendDocumentData(videoInfo)
   }
 }, NORMAL_MESSAGE_DELAY)
