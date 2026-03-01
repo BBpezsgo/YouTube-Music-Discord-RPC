@@ -5,9 +5,9 @@
   "description": "YouTube Music Discord RPC",
   "background": {
     "scripts": [
-      "src/background.js"
+      "src/background.min.js"
     ],
-    "service_worker": "src/background.js"
+    "service_worker": "src/background.min.js"
   },
   "icons": {
     "16": "icons/icon16.png",
@@ -18,7 +18,7 @@
   },
   "action": {
     "default_icon": "icons/icon16.png",
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.min.html"
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
@@ -30,7 +30,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "src/content.js"
+        "src/content.min.js"
       ],
       "matches": [
         "https://music.youtube.com/*"
@@ -43,7 +43,7 @@
         "https://music.youtube.com/*"
       ],
       "js": [
-        "src/content-loader.js"
+        "src/content-loader.min.js"
       ]
     }
   ],

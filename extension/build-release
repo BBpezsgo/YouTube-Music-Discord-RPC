@@ -2,11 +2,11 @@
 
 mkdir out
 
-cp ./src/background.js ./src/background.min.js
-cp ./src/content-loader.js ./src/content-loader.min.js
-cp ./src/content.js ./src/content.min.js
-cp ./popup/popup.js ./popup/popup.min.js
-cp ./popup/popup.html ./popup/popup.min.html
+npx minify ./src/background.js > ./src/background.min.js
+npx minify ./src/content-loader.js > ./src/content-loader.min.js
+npx minify ./src/content.js > ./src/content.min.js
+npx minify ./popup/popup.js > ./popup/popup.min.js
+npx minify ./popup/popup.html > ./popup/popup.min.html
 
 zip -r -FS ./out/discord-youtube-music.xpi \
   ./icons \
