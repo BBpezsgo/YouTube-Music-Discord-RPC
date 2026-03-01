@@ -179,6 +179,46 @@ public sealed class DiscordClient : IDisposable
             richPresence.Buttons = [.. _buttons];
         }
 
+        if (presence.TryGetProperty("secrets", out JsonElement secrets) && secrets.ValueKind == JsonValueKind.Object)
+        {
+            richPresence.Secrets ??= new();
+
+            if (secrets.TryGetProperty("joinSecret", out string? joinSecret))
+            {
+                richPresence.Secrets.JoinSecret = joinSecret;
+            }
+
+            if (secrets.TryGetProperty("spectateSecret", out string? spectateSecret))
+            {
+                richPresence.Secrets.SpectateSecret = spectateSecret;
+            }
+        }
+
+        if (presence.TryGetProperty("party", out JsonElement party) && party.ValueKind == JsonValueKind.Object)
+        {
+            richPresence.Party ??= new();
+
+            if (party.TryGetProperty("id", out string? id))
+            {
+                richPresence.Party.ID = id;
+            }
+
+            if (party.TryGetProperty("max", out int max))
+            {
+                richPresence.Party.Max = max;
+            }
+
+            if (party.TryGetProperty("size", out int size))
+            {
+                richPresence.Party.Size = size;
+            }
+
+            if (party.TryGetProperty("privacy", out int privacy))
+            {
+                richPresence.Party.Privacy = (Party.PrivacySetting)privacy;
+            }
+        }
+
         UpdatePresence(richPresence);
     }
 

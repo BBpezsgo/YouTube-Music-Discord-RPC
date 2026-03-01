@@ -13,10 +13,8 @@ const MINIPLAYER_LIVESTREAM_AUTHOR_SELECTOR = "#video-container #info-bar #owner
 const NO_MINIPLAYER_ATTRIBUTE = "display: none;"
 const YES_MINIPLAYER_ATRRIBUTE = ""
 
-/** @type {any} */
-let documentData = new Object()
-let videoPlayer = document.getElementById("movie_player")
-let shouldSendData = 0
+/** @type {import('./types').VideoInfo} */
+let documentData = null
 
 /**
  * @param {string} url
@@ -34,14 +32,18 @@ function getVideoId(url) {
  * @return {Promise<any>}
  */
 async function getOEmbedJSON(videoId) {
-  const response = await fetch("https://www.youtube.com/oembed?url=http%3A//youtube.com/watch%3Fv%3D" + videoId + "&format=json")
+  const response = await fetch(`https://www.youtube.com/oembed?url=http%3A//youtube.com/watch%3Fv%3D${videoId}&format=json`)
   if (!response.ok) {
     throw new Error(response.statusText)
   }
   return response.json()
 }
 
-function getLivestreamData() {
+/**
+ * @param {HTMLElement} videoPlayer
+ * @param {import('./types').VideoInfo} result
+ */
+function getLivestreamData(videoPlayer, result) {
   const miniplayerHTML = videoPlayer.querySelector(MINIPLAYER_ELEMENT_SELECTOR)
   if (!miniplayerHTML || (miniplayerHTML && miniplayerHTML.getAttribute("style") == NO_MINIPLAYER_ATTRIBUTE)) {
     /** @type {HTMLAnchorElement} */
@@ -50,16 +52,16 @@ function getLivestreamData() {
     const authorHTML = document.querySelector(MAIN_LIVESTREAM_AUTHOR_SELECTOR)
 
     if (titleHTML) {
-      documentData.title = titleHTML.innerText
+      result.title = titleHTML.innerText
     } else {
-      documentData.title = null
+      result.title = null
     }
 
     if (authorHTML) {
-      documentData.author = authorHTML.innerText
-      documentData.channelUrl = authorHTML.href
+      result.author = authorHTML.innerText
+      result.channelUrl = authorHTML.href
     } else {
-      documentData.author = null
+      result.author = null
     }
   } else if (miniplayerHTML && miniplayerHTML.getAttribute("style") == YES_MINIPLAYER_ATRRIBUTE) {
     /** @type {HTMLAnchorElement} */
@@ -68,86 +70,96 @@ function getLivestreamData() {
     const authorHTML = document.querySelector(MINIPLAYER_LIVESTREAM_AUTHOR_SELECTOR)
 
     if (titleHTML) {
-      documentData.title = titleHTML.innerText
+      result.title = titleHTML.innerText
     } else {
-      documentData.title = null
+      result.title = null
     }
 
     if (authorHTML) {
-      documentData.author = authorHTML.innerText
-      documentData.channelUrl = authorHTML.href
+      result.author = authorHTML.innerText
+      result.channelUrl = authorHTML.href
     } else {
-      documentData.author = null
+      result.author = null
     }
   }
 }
 
-function getTimeData() {
+/**
+ * @param {import('./types').YouTubeVideoPlayer} videoPlayer
+ * @param {import('./types').VideoInfo} result
+ */
+function getTimeData(videoPlayer, result) {
   if (videoPlayer.getDuration() && videoPlayer.getCurrentTime()) {
-    documentData.duration = videoPlayer.getDuration()
-    documentData.timeLeft = documentData.duration - videoPlayer.getCurrentTime()
-    if (documentData.timeLeft < 0) {
-      documentData.timeLeft = null
+    result.duration = videoPlayer.getDuration()
+    result.timeLeft = result.duration - videoPlayer.getCurrentTime()
+    if (result.timeLeft < 0) {
+      result.timeLeft = null
     }
   } else {
-    documentData.timeLeft = null
+    result.timeLeft = null
     console.log("Unable to get timestamp data for YouTubeDiscordPresence")
   }
 }
 
-function sendDocumentData() {
-  if (documentData.title && documentData.author && documentData.timeLeft) {
-    if (documentData.author.endsWith(" - Topic")) {
-      documentData.author = documentData.author.slice(0, -8)
+/**
+ * @param {import('./types').VideoInfo} result
+ */
+function sendDocumentData(result) {
+  if (result.title && result.author && result.timeLeft) {
+    if (result.author.endsWith(" - Topic")) {
+      result.author = result.author.slice(0, -8)
     }
-    window.dispatchEvent(new CustomEvent("SendToLoader", { detail: documentData }))
+    window.dispatchEvent(new CustomEvent("SendToLoader", { detail: result }))
   }
 }
 
-function handleYouTubeData() {
+/**
+ * @param {import('./types').YouTubeVideoPlayer} videoPlayer
+ * @param {import('./types').VideoInfo} result
+ */
+function handleYouTubeData(videoPlayer, result) {
   const livestreamHTML = videoPlayer.querySelector(LIVESTREAM_ELEMENT_SELECTOR)
-  documentData.videoId = getVideoId(videoPlayer.getVideoUrl())
-  documentData.applicationType = window.location.href.includes("music.youtube") ? "youtubeMusic" : "youtube"
-  documentData.playerState = videoPlayer.getPlayerState()
+  result.videoId = getVideoId(videoPlayer.getVideoUrl())
+  result.applicationType = window.location.href.includes("music.youtube") ? "youtubeMusic" : "youtube"
+  result.playerState = videoPlayer.getPlayerState()
 
-  if (documentData.applicationType == "youtubeMusic") { // GRABS YT MUSIC ALBUM THUMBNAIL
+  if (result.applicationType == "youtubeMusic") { // GRABS YT MUSIC ALBUM THUMBNAIL
     const thumbnail = document.querySelector("#song-image #thumbnail #img")
-    if (thumbnail && "src" in thumbnail && thumbnail.src.startsWith("https://lh3.googleusercontent.com/")) {
-      documentData.thumbnailUrl = thumbnail.src
+    if (thumbnail && "src" in thumbnail && typeof thumbnail.src === 'string' && thumbnail.src.startsWith("https://lh3.googleusercontent.com/")) {
+      result.thumbnailUrl = thumbnail.src
     } else {
-      documentData.thumbnailUrl = `https://i.ytimg.com/vi/${documentData.videoId}/hqdefault.jpg`
+      result.thumbnailUrl = `https://i.ytimg.com/vi/${result.videoId}/hqdefault.jpg`
     }
   } else {
-    documentData.thumbnailUrl = `https://i.ytimg.com/vi/${documentData.videoId}/hqdefault.jpg`
+    result.thumbnailUrl = `https://i.ytimg.com/vi/${result.videoId}/hqdefault.jpg`
   }
 
   if (!livestreamHTML) {
-    getOEmbedJSON(documentData.videoId).then(data => { // TRY USING OEMBED FIRST
-      documentData.title = data.title
-      documentData.author = data.author_name
-      documentData.channelUrl = data.author_url
+    getOEmbedJSON(result.videoId).then(data => { // TRY USING OEMBED FIRST
+      result.title = data.title
+      result.author = data.author_name
+      result.channelUrl = data.author_url
       try {
-        documentData.albumLinks = [...document.getElementsByTagName('ytmusic-player-bar').item(0).getElementsByTagName('a')].map(v => ({ link: v.href, text: v.textContent })).filter(v => v.link).filter(v => v.link.includes('browse/'))
+        result.albumLinks = [...document.getElementsByTagName('ytmusic-player-bar').item(0).getElementsByTagName('a')].map(v => ({ link: v.href, text: v.textContent })).filter(v => v.link).filter(v => v.link.includes('browse/'))
       } catch (error) {
       }
-      getTimeData()
-      sendDocumentData()
+      getTimeData(videoPlayer, result)
     }).catch(error => {
-      getLivestreamData()
-      getTimeData()
-      sendDocumentData()
+      getLivestreamData(videoPlayer, result)
+      getTimeData(videoPlayer, result)
       console.error(error)
     })
   } else {
-    getLivestreamData()
-    documentData.timeLeft = -1
-    sendDocumentData()
+    getLivestreamData(videoPlayer, result)
+    result.timeLeft = -1
   }
 }
 
 setInterval(() => {
-  videoPlayer = document.getElementById("movie_player")
+  /** @type {import('./types').YouTubeVideoPlayer} */ // @ts-ignore
+  const videoPlayer = document.getElementById("movie_player")
   if (videoPlayer && document.querySelector(AD_SELECTOR) == null) {
-    handleYouTubeData()
+    handleYouTubeData(videoPlayer, documentData)
+    sendDocumentData(documentData)
   }
 }, NORMAL_MESSAGE_DELAY)

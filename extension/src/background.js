@@ -83,92 +83,38 @@ const ws = {
     setPresenceIcon()
   },
 }
-//ws.connect()
 
 function setPresenceIcon() {
-  if (!ws.ok) {
-    browser.action.setIcon({
-      path: "icons/icon16-off.png"
-    })
-  } else if (presence) {
-    browser.action.setIcon({
-      path: "icons/icon16-on.png"
-    })
-  } else {
-    browser.action.setIcon({
-      path: "icons/icon16.png"
-    })
+  switch (ws._?.readyState) {
+    case WebSocket.CONNECTING:
+      browser.action.setIcon({ path: "icons/icon16-loading.png" })
+      break
+    case WebSocket.OPEN:
+      if (presence) {
+        browser.action.setIcon({ path: "icons/icon16-on.png" })
+      } else {
+        browser.action.setIcon({ path: "icons/icon16.png" })
+      }
+      break
+    case WebSocket.CLOSING:
+      browser.action.setIcon({ path: "icons/icon16-loading.png" })
+      break
+    case WebSocket.CLOSED:
+    default:
+      browser.action.setIcon({ path: "icons/icon16-off.png" })
+      break
   }
 }
 
-function sanitizePresence(presence) {
-  if (!presence) return null
-
-  //if emtpy
-  if (typeof presence.details !== 'undefined' && presence.details === "") {
-    delete presence.details
-  }
-  if (typeof presence.state !== 'undefined' && presence.state === "") {
-    delete presence.state
-  }
-  if (typeof presence.largeImageKey !== 'undefined' && presence.largeImageKey === "") {
-    delete presence.largeImageKey
-  }
-  if (typeof presence.smallImageKey !== 'undefined' && presence.smallImageKey === "") {
-    delete presence.smallImageKey
-  }
-  if (typeof presence.largeImageText !== 'undefined' && presence.largeImageText === "") {
-    delete presence.largeImageText
-  }
-  if (typeof presence.smallImageText !== 'undefined' && presence.smallImageText === "") {
-    delete presence.smallImageText
-  }
-  if (typeof presence.type !== 'undefined' && ![0, 2, 3, 5].includes(presence.type)) {
-    delete presence.type
-  }
-
-  if (typeof presence.endTimestamp !== 'undefined') {
-    presence.endTimestamp = Math.round(presence.endTimestamp)
-  }
-
-  if (typeof presence.startTimestamp !== 'undefined') {
-    presence.startTimestamp = Math.round(presence.startTimestamp)
-  }
-
-  //party
-  if (!/^\d+$/.test(presence.partySize) || !/^\d+$/.test(presence.partyMax) || presence.partySize > presence.partyMax) {
-    delete presence.partySize
-    delete presence.partyMax
-  }
-  //state
-  if (typeof presence.state !== 'undefined') {
-    presence.state = presence.state.substring(0, 127)
-  }
-  //details
-  if (typeof presence.details !== 'undefined') {
-    presence.details = presence.details.substring(0, 127)
-  }
-  //endtimestamp
-  if (typeof presence.endTimestamp !== 'undefined' && (!/^\d+$/.test(presence.endTimestamp) || presence.endTimestamp === "")) {
-    delete presence.endTimestamp
-  }
-  //starttimestamp
-  if (typeof presence.startTimestamp !== 'undefined' && (!/^\d+$/.test(presence.startTimestamp) || presence.startTimestamp === "")) {
-    delete presence.startTimestamp
-  }
-  //buttons
-  if (typeof presence.buttons !== 'undefined' && presence.buttons.length > 2) {
-    while (presence.buttons.length > 2) {
-      presence.buttons.pop()
-    }
-  }
-  if (typeof presence.buttons !== 'undefined' && !presence.buttons.length) delete presence.buttons
-  return presence
-}
-
+/** @type {import('./types').Presence} */
 let presence = null
 
+/**
+ * @param {import('./types').VideoInfo} data
+ * @returns {import('./types').Presence}
+ */
 function makePresence(data) {
+  /** @type {import('./types').Presence} */
   const result = {
     type: 2,
     details: data.title.substring(0, 128),
@@ -203,7 +149,7 @@ function makePresence(data) {
   return result
 }
 
-/** @type {Map<number, any>} */
+/** @type {Map<number, import('./types').Presence>} */
 const tabPresences = new Map()
 
 browser.tabs.onRemoved.addListener(tabId => {
@@ -225,7 +171,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (sender.tab?.id !== undefined && sender.tab?.id !== null) {
         tabPresences.set(sender.tab.id, presence)
         for (const tabId of tabPresences.keys()) {
-          if (tabId !== sender.tab.id && tabPresences.get(tabId) && !presence){
+          if (tabId !== sender.tab.id && tabPresences.get(tabId) && !presence) {
             console.log(`Ignoring empty presence because an other presence is active on an other tab`)
             return
           }
@@ -236,7 +182,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       ws.connect()
         .then(() => {
-          presence = sanitizePresence(presence)
           ws.send(JSON.stringify({
             presence: presence,
             clientId: '1467513379848589464',
@@ -247,8 +192,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'REQUEST_UI':
       sendResponse({
         websocket: ws._?.readyState ?? null,
-        presences: presence ? [presence] : [],
-        domain: '',
+        presences: [...tabPresences.values()],
       })
       break
     default:

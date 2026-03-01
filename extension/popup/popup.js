@@ -1,15 +1,14 @@
 //@ts-check
 
 /**
- * @param {any} data
+ * @param {{ websocket: number | null; presences: Array<import('../src/types').Presence> }} data
  */
 function refresh(data) {
   let html = ''
 
   if (!data.websocket) {
-    html += '<div><b>Not connected</b></div>'
-  } else if (data.presences) {
-    html = '<div><b>No presences</b></div>'
+    html = '<div><b>Not connected</b></div>'
+  } else if (data.presences.length) {
     /**
      * @param {number} seconds
      * @returns {string}
@@ -45,9 +44,19 @@ function refresh(data) {
         time = `<div class="time">${formatSecondsTimestamp(presence.timestamps.end - now)} left</div>`
       }
 
-      const details = !presence.details ? '' : '<div>' + presence.details + '</div>'
+      const details =
+        !presence.details
+        ? ''
+        : presence.detailsUrl
+        ? `<a href="${presence.detailsUrl}">${presence.details}</a>`
+        : `<span>${presence.details}</span>`
 
-      const state = !presence.state ? '' : '<div>' + presence.state + '</div>'
+      const state =
+        !presence.state
+        ? ''
+        : presence.stateUrl
+        ? `<a href="${presence.stateUrl}">${presence.state}</a>`
+        : `<span>${presence.state}</span>`
 
       html += `
         <div class="horizontal">
@@ -59,14 +68,13 @@ function refresh(data) {
           <div class="content">
             <h1>${details}</h1>
             <p>${state}</p>
-            <p>YouTube Music</p>
             ${time}
           </div>
         </div>
       `
     }
   } else {
-    html += `<div><b>No Presence Active</b></div>`
+    html = `<div><b>No presences</b></div>`
   }
 
   document.getElementById('main').innerHTML = html
